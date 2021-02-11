@@ -146,6 +146,7 @@
   <ItemGroup>
     <ClInclude Include="SistemasLineares.h" />
     <ClInclude Include="Vetores.h" />
+    <ClInclude Include="VLM.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

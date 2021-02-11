@@ -32,5 +32,8 @@
     <ClInclude Include="Vetores.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
+    <ClInclude Include="VLM.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
