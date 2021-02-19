@@ -45,4 +45,4 @@ public:
 
 
 Vetor3D InfluenciaAnel(Painel p1, Painel p2);
-void CarregarDadosPainel(int numeroPainel, std::map<int, Painel>& Paineis);
+void CarregarDadosPainel(std::map<int, Painel>& Paineis);

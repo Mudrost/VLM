@@ -21,14 +21,15 @@ int main() {
 	auto duracao = std::chrono::system_clock::now().time_since_epoch();
 	auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duracao).count();
 
-	for (int i = 0; i < 8; i++) {
-		CarregarDadosPainel(i, Paineis);
-	}
+	
+	CarregarDadosPainel(Paineis);
+	
 
 	auto duracaocarregar = std::chrono::system_clock::now().time_since_epoch();
 	auto millis2 = std::chrono::duration_cast<std::chrono::milliseconds>(duracaocarregar).count();
 
 	cout << "Tempo para carregar dados: " << millis2 - millis << "ms" << endl;
+	/*
 	cout << "Dados dos painéis:\n";
 	for (int i = 0; i < 8; i++) {
 		cout << "Painel " << i + 1 << endl;
@@ -46,77 +47,76 @@ int main() {
 		cout << Paineis[i].Vertice4Painel.x << ", " << Paineis[i].Vertice4Painel.y << ", " << Paineis[i].Vertice4Painel.z << endl;
 		cout << endl;
 	}
+	*/
 
-
-
+	InfluenciaAnel(Paineis[1], Paineis[2]);
 
 
 
 
 }
 
-void CarregarDadosPainel(int numeroPainel, map<int, Painel>& Paineis) {
+void CarregarDadosPainel(map<int, Painel>& Paineis) {
 	// Alimentação de dados dos painéis através dos arquivos .txt
 	// Ordem: Vértices do anel 1,2,3,4, ponto de controle, e então vértices do painel 1, 2, 3 e 4
-	ifstream arquivo("vertices_anel.txt");
-	
-	string ArquivoAnel;
-
+	ifstream arquivoAnel("vertices_anel.txt");
+	ifstream arquivoPonto("pontos_de_controle.txt");
+	ifstream arquivoPainel("vertices_painel.txt");
 	Vetor3D vecs[9];
-
-	if (arquivo) {
-		ostringstream ss;
-		ss << arquivo.rdbuf();
-		ArquivoAnel = ss.str();
-		ArquivoAnel.erase(0, 433 + (99 *numeroPainel));
-		size_t aux;
-		for (int i = 0; i < 4; i++) {
-			double x = stod(ArquivoAnel, &aux);
-			ArquivoAnel.erase(0, aux);
-			double y = stod(ArquivoAnel, &aux);
-			ArquivoAnel.erase(0, aux);
-			double z = stod(ArquivoAnel, &aux);
-			ArquivoAnel.erase(0, aux);
-			vecs[i] = Vetor3D(x, y, z);
+	if (arquivoAnel && arquivoPonto && arquivoPainel) {
+		ostringstream ss1, ss2, ss3;
+		string ArquivoAnel, ArquivoPonto, ArquivoPainel;
+		ss1 << arquivoAnel.rdbuf();
+		ArquivoAnel = ss1.str();
+		ArquivoAnel.erase(0, 433);
+		ss2 << arquivoPonto.rdbuf();
+		ArquivoPonto = ss2.str();
+		ArquivoPonto.erase(0, 67);
+		ss3 << arquivoPainel.rdbuf();
+		ArquivoPainel = ss3.str();
+		ArquivoPainel.erase(0, 451);
+		for (int nPainel = 0; nPainel < 8; nPainel++) {
+			size_t aux;
+			for (int i = 0; i < 4; i++) {
+				double x = stod(ArquivoAnel, &aux);
+				ArquivoAnel.erase(0, aux);
+				double y = stod(ArquivoAnel, &aux);
+				ArquivoAnel.erase(0, aux);
+				double z = stod(ArquivoAnel, &aux);
+				ArquivoAnel.erase(0, aux);
+				if (i == 3 && nPainel != 7) {
+					stod(ArquivoAnel, &aux);
+					ArquivoAnel.erase(0, aux);
+				}
+				vecs[i] = Vetor3D(x, y, z);
+			}
+			double xP = stod(ArquivoPonto, &aux);
+			ArquivoPonto.erase(0, aux);
+			double yP = stod(ArquivoPonto, &aux);
+			ArquivoPonto.erase(0, aux);
+			double zP = stod(ArquivoPonto, &aux);
+			ArquivoPonto.erase(0, aux);
+			if (nPainel != 7) {
+				stod(ArquivoPonto, &aux);
+				ArquivoPonto.erase(0, aux);
+			}
+			vecs[4] = Vetor3D(xP, yP, zP);
+			for (int i = 5; i < 9; i++) {
+				double x = stod(ArquivoPainel, &aux);
+				ArquivoPainel.erase(0, aux);
+				double y = stod(ArquivoPainel, &aux);
+				ArquivoPainel.erase(0, aux);
+				double z = stod(ArquivoPainel, &aux);
+				ArquivoPainel.erase(0, aux);
+				if (i == 8 && nPainel != 7) {
+					stod(ArquivoPainel, &aux);
+					ArquivoPainel.erase(0, aux);
+				}
+				vecs[i] = Vetor3D(x, y, z);
+			}
+			Paineis[nPainel] = Painel(vecs[0], vecs[1], vecs[2], vecs[3], vecs[4], vecs[5], vecs[6], vecs[7], vecs[8]);
 		}
 	}
-	
-	arquivo.close();
-	arquivo.open("pontos_de_controle.txt");
-	if (arquivo) {
-		ostringstream ss;
-		ss << arquivo.rdbuf();
-		ArquivoAnel = ss.str();
-		ArquivoAnel.erase(0, 67 + (27 *numeroPainel));
-		size_t aux;
-		double x = stod(ArquivoAnel, &aux);
-		ArquivoAnel.erase(0, aux);
-		double y = stod(ArquivoAnel, &aux);
-		ArquivoAnel.erase(0, aux);
-		double z = stod(ArquivoAnel, &aux);
-		ArquivoAnel.erase(0, aux);
-		vecs[4] = Vetor3D(x, y, z);
-	}
-	arquivo.close();
-	arquivo.open("vertices_painel.txt");
-	if (arquivo) {
-		ostringstream ss;
-		ss << arquivo.rdbuf();
-		ArquivoAnel = ss.str();
-		ArquivoAnel.erase(0, 451 + (99 *numeroPainel));
-		size_t aux;
-		for (int i = 5; i < 9; i++) {
-			double x = stod(ArquivoAnel, &aux);
-			ArquivoAnel.erase(0, aux);
-			double y = stod(ArquivoAnel, &aux);
-			ArquivoAnel.erase(0, aux);
-			double z = stod(ArquivoAnel, &aux);
-			ArquivoAnel.erase(0, aux);
-			vecs[i] = Vetor3D(x, y, z);
-		}
-	}
-
-	Paineis[numeroPainel] = Painel(vecs[0], vecs[1], vecs[2], vecs[3], vecs[4], vecs[5], vecs[6], vecs[7], vecs[8]);
 }
 
 
