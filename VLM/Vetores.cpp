@@ -4,6 +4,7 @@
 
 #include "Vetores.h"
 #include <math.h>
+#include <iostream>
 
 Vetor3D Vetor3D::operator+ (const Vetor3D& vec) {
 	return Vetor3D(x + vec.x, y + vec.y, z + vec.z);
@@ -31,4 +32,7 @@ double Vetor3D::square() {
 }
 double Vetor3D::dot(Vetor3D vec) {
 	return ((x * vec.x) + (y * vec.y) + (z * vec.z));
+}
+void Vetor3D::Mostrar() {
+	std::cout << "x = " << this->x << ",\ty = " << this->y << ",\tz = " << this->z << std::endl;
 }

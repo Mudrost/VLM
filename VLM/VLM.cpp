@@ -2,7 +2,7 @@
 	For full details, check https://github.com/Mudrost/VLM/blob/main/LICENSE
 */
 
-#include "SistemasLineares.h"
+#include "Matriz.h"
 #include "Vetores.h"
 #include "VLM.h"
 #include <math.h>
@@ -10,51 +10,55 @@
 #include <sstream>
 #include <string>
 #include <iostream>
-#include <chrono>
 
 constexpr double pi = 3.14159265358979323846;
 using namespace std;
 
 int main() {
 	// Mapeando os paineis aos índices fornecidos
-	map<int, Painel> Paineis;
-	auto duracao = std::chrono::system_clock::now().time_since_epoch();
-	auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duracao).count();
-
-	
+	map<int, Painel>		Paineis;
+	map<string, Vetor3D>	InfluenciasA;
 	CarregarDadosPainel(Paineis);
 	
-
-	auto duracaocarregar = std::chrono::system_clock::now().time_since_epoch();
-	auto millis2 = std::chrono::duration_cast<std::chrono::milliseconds>(duracaocarregar).count();
-
-	cout << "Tempo para carregar dados: " << millis2 - millis << "ms" << endl;
-	/*
-	cout << "Dados dos painéis:\n";
-	for (int i = 0; i < 8; i++) {
-		cout << "Painel " << i + 1 << endl;
-		cout << "Anel: " << endl;
-		cout << Paineis[i].Vertice1Anel.x << ", " << Paineis[i].Vertice1Anel.y << ", " << Paineis[i].Vertice1Anel.z << endl;
-		cout << Paineis[i].Vertice2Anel.x << ", " << Paineis[i].Vertice2Anel.y << ", " << Paineis[i].Vertice2Anel.z << endl;
-		cout << Paineis[i].Vertice3Anel.x << ", " << Paineis[i].Vertice3Anel.y << ", " << Paineis[i].Vertice3Anel.z << endl;
-		cout << Paineis[i].Vertice4Anel.x << ", " << Paineis[i].Vertice4Anel.y << ", " << Paineis[i].Vertice4Anel.z << endl;
-		cout << "Ponto de controle: " << endl;
-		cout << Paineis[i].PontoDeControle.x << ", " << Paineis[i].PontoDeControle.y << ", " << Paineis[i].PontoDeControle.z << endl;
-		cout << "Vértices do painel: " << endl;
-		cout << Paineis[i].Vertice1Painel.x << ", " << Paineis[i].Vertice1Painel.y << ", " << Paineis[i].Vertice1Painel.z << endl;
-		cout << Paineis[i].Vertice2Painel.x << ", " << Paineis[i].Vertice2Painel.y << ", " << Paineis[i].Vertice2Painel.z << endl;
-		cout << Paineis[i].Vertice3Painel.x << ", " << Paineis[i].Vertice3Painel.y << ", " << Paineis[i].Vertice3Painel.z << endl;
-		cout << Paineis[i].Vertice4Painel.x << ", " << Paineis[i].Vertice4Painel.y << ", " << Paineis[i].Vertice4Painel.z << endl;
+	for (int i = 1; i <= 8; i++) {
+		cout << "Influencia do painel " << i << " sobre os demais: " << endl;
+		for (int j = 1; j <= 8; j++) {
+			char buf[5];
+			cout << "C" << i << "," << j << endl;
+			sprintf_s(buf, sizeof(buf),"C%d,%d", i, j);		// Ex: C1,7
+			InfluenciasA[buf] = InfluenciaAnel(Paineis[i-1], Paineis[j-1]);
+			InfluenciasA[buf].Mostrar();
+		}
 		cout << endl;
 	}
-	*/
 
-	InfluenciaAnel(Paineis[1], Paineis[2]);
-
-
-
+	Matriz matriz(4, 3);
+	matriz.dados[0] = 1;
+	matriz.dados[1] = 3;
+	matriz.dados[2] = -1;
+	matriz.dados[3] = 13;
+	matriz.dados[4] = 4;
+	matriz.dados[5] = -1;
+	matriz.dados[6] = 1;
+	matriz.dados[7] = 9;
+	matriz.dados[8] = 2;
+	matriz.dados[9] = 4;
+	matriz.dados[10] = 3;
+	matriz.dados[11] = -6;
+	matriz.Mostrar();
+	matriz.EliminacaoGauss();
+	matriz.Mostrar();
+	Matriz resultados(1, 4);
+	matriz.SubstituicaoReversa(resultados.dados);
+	resultados.Mostrar();
 
 }
+
+
+
+
+
+
 
 void CarregarDadosPainel(map<int, Painel>& Paineis) {
 	// Alimentação de dados dos painéis através dos arquivos .txt
@@ -119,11 +123,26 @@ void CarregarDadosPainel(map<int, Painel>& Paineis) {
 	}
 }
 
+Vetor3D VetorNormal(Painel p) {
+	// Retorna o vetor normal ao painel fornecido
+	Vetor3D aux = (p.Vertice3Painel - p.Vertice1Painel) * (p.Vertice2Painel - p.Vertice4Painel);
+	return (aux / aux.mod());
+}
 
-
+Vetor3D InfluenciaFerradura(Painel p1, Painel p2, double alpharad) {
+	// Calcula o fator de influência do vórtice ferradura na esteira de um painel qualquer p1 sobre o ponto de controle de um painel qualquer p2
+	Vetor3D e(cos(alpharad), 0, sin(alpharad));
+	Vetor3D r1 = p1.PontoDeControle - p2.Vertice1Anel;
+	Vetor3D r2 = p1.PontoDeControle - p2.Vertice2Anel;
+	Vetor3D r12 = (r2 - r1) * (-1);
+	Vetor3D influencia1 = (e * r2) * ((r2.dot(e) / r2.mod()) + 1) / (4 * pi * ((e * r2).mod() * (e * r2).mod()));
+	Vetor3D influencia2 = (e * r1) * ((r1.dot(e) / r1.mod()) + 1) / (4 * pi * ((e * r1).mod() * (e * r1).mod()));
+	Vetor3D influencia3 = ((r1 * r2) / (4 * pi * ((r1 * r2).mod() * (r1 * r2).mod()))) * ((r12.dot(r1) / r1.mod()) - (r12.dot(r2) / r2.mod()));
+	return influencia1 - influencia2 + influencia3;
+}
 
 Vetor3D InfluenciaAnel(Painel p1, Painel p2) {
-	// Calcula o fator de influência de um painel qualquer p1 sobre o painel p2
+	// Calcula o fator de influência do vórtice anel de um painel qualquer p1 sobre o ponto de controle de um painel qualquer p2
 	Vetor3D r1 = p1.PontoDeControle - p2.Vertice1Anel;
 	Vetor3D r2 = p1.PontoDeControle - p2.Vertice2Anel;
 	Vetor3D r3 = p1.PontoDeControle - p2.Vertice3Anel;
@@ -137,4 +156,12 @@ Vetor3D InfluenciaAnel(Painel p1, Painel p2) {
 	Vetor3D influencia3 = ((r3 * r4) / (4 * pi * ((r3 * r4).mod() * (r3 * r4).mod()))) * ((r34.dot(r3) / r3.mod()) - (r34.dot(r4) / r4.mod()));
 	Vetor3D influencia4 = ((r4 * r1) / (4 * pi * ((r4 * r1).mod() * (r4 * r1).mod()))) * ((r41.dot(r4) / r4.mod()) - (r41.dot(r1) / r1.mod()));
 	return influencia1+influencia2+influencia3+influencia4;
+}
+
+
+void EliminacaoGaussiana(double* matriz, size_t tamanho) {
+
+	
+
+
 }

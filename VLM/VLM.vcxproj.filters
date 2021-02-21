@@ -18,21 +18,21 @@
     <ClCompile Include="VLM.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SistemasLineares.cpp">
+    <ClCompile Include="Vetores.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Vetores.cpp">
+    <ClCompile Include="Matriz.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SistemasLineares.h">
-      <Filter>Resource Files</Filter>
-    </ClInclude>
     <ClInclude Include="Vetores.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
     <ClInclude Include="VLM.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Matriz.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
   </ItemGroup>

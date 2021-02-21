@@ -139,12 +139,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="SistemasLineares.cpp" />
+    <ClCompile Include="Matriz.cpp" />
     <ClCompile Include="Vetores.cpp" />
     <ClCompile Include="VLM.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SistemasLineares.h" />
+    <ClInclude Include="Matriz.h" />
     <ClInclude Include="Vetores.h" />
     <ClInclude Include="VLM.h" />
   </ItemGroup>

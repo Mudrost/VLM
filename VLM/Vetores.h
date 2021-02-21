@@ -11,6 +11,7 @@ public:
 	Vetor3D() { x = y = z = 0; }
 	Vetor3D(double x0, double y0, double z0) { x = x0; y = y0; z = z0; }
 
+	void Mostrar();
 	// Destrutores
 	~Vetor3D() {};
 	// Dados
