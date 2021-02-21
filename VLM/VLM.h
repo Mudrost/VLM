@@ -43,7 +43,7 @@ public:
 
 
 Vetor3D InfluenciaAnel(Painel p1, Painel p2);
-Vetor3D InfluenciaFerradura(Painel p1, Painel p2, double alpha, double V);
+Vetor3D InfluenciaFerradura(Painel p1, Painel p2, double alpha);
 Vetor3D VetorNormal(Painel p);
 void CarregarDadosPainel(std::map<int, Painel>& Paineis);
 void EliminacaoGaussiana(double* matriz, size_t tamanho);

@@ -17,38 +17,52 @@ using namespace std;
 int main() {
 	// Mapeando os paineis aos índices fornecidos
 	map<int, Painel>		Paineis;
-	map<string, Vetor3D>	InfluenciasA;
+	map<string, Vetor3D>	InfluenciasA;			// Influencias (vórtice anel)
+	map<string, Vetor3D>	InfluenciasF;			// Influencias (vórtice ferradura na esteira)
+
+
+	const int numeroPaineis = 8;
+	Vetor3D  vetorNormal[numeroPaineis];
+
 	CarregarDadosPainel(Paineis);
+	double Vinf = 15;
+	double alpha = 3 * pi / 180;
 	
-	for (int i = 1; i <= 8; i++) {
+
+
+	Matriz matriz(numeroPaineis+1, numeroPaineis);
+	for (int i = 1; i <= numeroPaineis; i++) {
+		vetorNormal[i-1] = VetorNormal(Paineis[i - 1]);
 		cout << "Influencia do painel " << i << " sobre os demais: " << endl;
-		for (int j = 1; j <= 8; j++) {
+		for (int j = 1; j <= numeroPaineis; j++) {
 			char buf[5];
 			cout << "C" << i << "," << j << endl;
 			sprintf_s(buf, sizeof(buf),"C%d,%d", i, j);		// Ex: C1,7
 			InfluenciasA[buf] = InfluenciaAnel(Paineis[i-1], Paineis[j-1]);
-			InfluenciasA[buf].Mostrar();
+		}
+		for (int j = 1; j <= numeroPaineis; j++) {
+			char buf[5];
+			cout << "C*" << i << "," << j << endl;
+			sprintf_s(buf, sizeof(buf), "C%d,%d", i, j);		// Ex: C1,7
+			InfluenciasF[buf] = InfluenciaFerradura(Paineis[i - 1], Paineis[j - 1], alpha);
+
+			if (j >= 5) {
+				matriz.dados[(size_t(i) - 1) * (matriz.colunas) + j - 1] = InfluenciasF[buf].dot(vetorNormal[i - 1]) + InfluenciasA[buf].dot(vetorNormal[i-1]);
+			}
+			else {
+				matriz.dados[(size_t(i) - 1) * (matriz.colunas) + j - 1] = InfluenciasA[buf].dot(vetorNormal[i - 1]);
+			}
 		}
 		cout << endl;
+
+		matriz.dados[(size_t(i) - 1) * (matriz.colunas) + (matriz.linhas)] = -Vetor3D(Vinf, 0, 0).dot(vetorNormal[i - 1]);
+		
 	}
 
-	Matriz matriz(4, 3);
-	matriz.dados[0] = 1;
-	matriz.dados[1] = 3;
-	matriz.dados[2] = -1;
-	matriz.dados[3] = 13;
-	matriz.dados[4] = 4;
-	matriz.dados[5] = -1;
-	matriz.dados[6] = 1;
-	matriz.dados[7] = 9;
-	matriz.dados[8] = 2;
-	matriz.dados[9] = 4;
-	matriz.dados[10] = 3;
-	matriz.dados[11] = -6;
 	matriz.Mostrar();
 	matriz.EliminacaoGauss();
 	matriz.Mostrar();
-	Matriz resultados(1, 4);
+	Matriz resultados(1, 8);
 	matriz.SubstituicaoReversa(resultados.dados);
 	resultados.Mostrar();
 
@@ -156,12 +170,4 @@ Vetor3D InfluenciaAnel(Painel p1, Painel p2) {
 	Vetor3D influencia3 = ((r3 * r4) / (4 * pi * ((r3 * r4).mod() * (r3 * r4).mod()))) * ((r34.dot(r3) / r3.mod()) - (r34.dot(r4) / r4.mod()));
 	Vetor3D influencia4 = ((r4 * r1) / (4 * pi * ((r4 * r1).mod() * (r4 * r1).mod()))) * ((r41.dot(r4) / r4.mod()) - (r41.dot(r1) / r1.mod()));
 	return influencia1+influencia2+influencia3+influencia4;
-}
-
-
-void EliminacaoGaussiana(double* matriz, size_t tamanho) {
-
-	
-
-
 }
